@@ -1,31 +1,47 @@
 <script setup>
+import Messages from "@/Components/Chat/Messages.vue";
+import Header from "@/Components/Chat/Header.vue";
+import Nav from "@/Components/Chat/Nav.vue";
+import Footer from "@/Components/Chat/Footer.vue";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import { Head } from "@inertiajs/vue3";
+import { useMessagesStore } from "@/Stores/useMessagesStore";
 
-defineProps({
+const messageStore = useMessagesStore();
+
+const props = defineProps({
     room: {
         type: Object,
         required: true,
     },
 });
+messageStore.fetchMessages(props.room.slug);
 </script>
 
 <template>
-    <Head title="Dashboard" />
+    <head title="Messages" />
+    <div>
+        <!-- Page Container -->
+        <div
+            id="page-container"
+            class="relative mx-auto h-screen min-w-[320px] bg-white lg:ms-80"
+        >
+            <!-- Page Sidebar -->
+            <Nav />
+            <!-- Page Sidebar -->
 
-    <AuthenticatedLayout>
-        <template #header>
-            <h2 class="text-xl font-semibold leading-tight text-gray-800">
-                Messages
-            </h2>
-        </template>
+            <!-- Page Header -->
+            <Header />
+            <!-- END Page Header -->
 
-        <div class="py-12">
-            <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
-                <div class="overflow-hidden bg-white shadow-sm sm:rounded-lg">
-                    <div class="p-6 text-gray-900">{{ room }}</div>
-                </div>
-            </div>
+            <!-- Page Content -->
+            <Messages :room="room" />
+            <!-- END Page Content -->
+
+            <!-- Page Footer -->
+            <Footer v-on:valid="console.log($event)" />
+            <!-- END Page Footer -->
         </div>
-    </AuthenticatedLayout>
+        <!-- END Page Container -->
+    </div>
 </template>
