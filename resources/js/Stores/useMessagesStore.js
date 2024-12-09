@@ -17,6 +17,23 @@ export const useMessagesStore = defineStore("messages", {
         async fetchMoreMessages(roomSlug) {
             this.fetchMessages(roomSlug, this.page + 1);
         },
+
+        storeMessage(roomSlug, payload) {
+            axios
+                .post(`/rooms/${roomSlug}/messages`, payload, {
+                    headers: {
+                        "X-Socket-Id": window.Echo.socketId(),
+                    },
+                })
+                .then((response) => {
+                    this.pushMessage(response.data);
+                });
+        },
+
+        pushMessage(message) {
+            this.messages.pop();
+            this.messages = [message, ...this.messages];
+        },
     },
     getters: {
         allMessages(state) {

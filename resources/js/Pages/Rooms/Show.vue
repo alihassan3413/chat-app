@@ -6,6 +6,7 @@ import Footer from "@/Components/Chat/Footer.vue";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import { Head } from "@inertiajs/vue3";
 import { useMessagesStore } from "@/Stores/useMessagesStore";
+import Echo from "laravel-echo";
 
 const messageStore = useMessagesStore();
 
@@ -15,6 +16,16 @@ const props = defineProps({
         required: true,
     },
 });
+
+const storeMessage = (payload) => {
+    messageStore.storeMessage(props.room.slug, payload);
+};
+
+const channel = window.Echo.join(`room.${props.room.id}`);
+channel.listen("MessageCreated", (e) => {
+    messageStore.pushMessage(e);
+});
+
 messageStore.fetchMessages(props.room.slug);
 </script>
 
@@ -39,7 +50,7 @@ messageStore.fetchMessages(props.room.slug);
             <!-- END Page Content -->
 
             <!-- Page Footer -->
-            <Footer v-on:valid="console.log($event)" />
+            <Footer v-on:valid="storeMessage({ content: $event })" />
             <!-- END Page Footer -->
         </div>
         <!-- END Page Container -->
