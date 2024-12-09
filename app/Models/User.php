@@ -33,6 +33,13 @@ class User extends Authenticatable
         'remember_token',
     ];
 
+
+    public function getAvatarAttribute()
+    {
+        return 'https://ui-avatars.com/api/?name=' . urlencode
+        ($this->name) . '&color=7F9CF&background=EBF4FF';
+    }
+
     /**
      * Get the attributes that should be cast.
      *

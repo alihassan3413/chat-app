@@ -7,8 +7,10 @@ import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import { Head } from "@inertiajs/vue3";
 import { useMessagesStore } from "@/Stores/useMessagesStore";
 import Echo from "laravel-echo";
+import { useUsersStore } from "@/Stores/useUsersStore";
 
 const messageStore = useMessagesStore();
+const userStore = useUsersStore();
 
 const props = defineProps({
     room: {
@@ -22,9 +24,22 @@ const storeMessage = (payload) => {
 };
 
 const channel = window.Echo.join(`room.${props.room.id}`);
-channel.listen("MessageCreated", (e) => {
-    messageStore.pushMessage(e);
-});
+channel
+    .listen("MessageCreated", (e) => {
+        messageStore.pushMessage(e);
+    })
+    .here((users) => {
+        userStore.setUsers(users);
+    })
+    .joining((user) => {
+        userStore.addUser(user);
+    })
+    .leaving((user) => {
+        userStore.removeUser(user);
+    })
+    .listenForWhisper("typing", (e) => {
+        userStore.setTyping(e);
+    });
 
 messageStore.fetchMessages(props.room.slug);
 </script>
@@ -50,7 +65,15 @@ messageStore.fetchMessages(props.room.slug);
             <!-- END Page Content -->
 
             <!-- Page Footer -->
-            <Footer v-on:valid="storeMessage({ content: $event })" />
+            <Footer
+                v-on:typing="
+                    channel.whisper('typing', {
+                        id: $page.props.auth.user.id,
+                        typing: $event,
+                    })
+                "
+                v-on:valid="storeMessage({ content: $event })"
+            />
             <!-- END Page Footer -->
         </div>
         <!-- END Page Container -->

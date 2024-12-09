@@ -31,7 +31,6 @@ const messageStore = useMessagesStore();
             <!-- Messages Received -->
             <div
                 v-for="message in messageStore.allMessages"
-                :key="message.id"
                 class="flex w-5/6 flex-col gap-2 lg:w-2/3 xl:w-1/3"
                 :class="{
                     'items-start': message.user.id != $page.props.auth.user.id,
